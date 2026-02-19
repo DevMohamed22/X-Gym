@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-GYM System | نظام إدارة الجيم</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+
+    <div id="login-screen" class="login-overlay">
+        <div class="login-box animate-pop">
+            <div class="logo-box">• X-GYM •</div>
+            <h4>Coach/Mohamed - Coach/Hamdy</h4>
+            <input type="text" id="username" placeholder="اسم المستخدم">
+            <input type="password" id="password" placeholder="كلمة المرور">
+            <button onclick="checkLogin()" class="btn-main glow-effect">دخول</button>
+        </div>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header class="animate-fade-down">
+            <div class="logo-text">X-GYM System</div>
+        </header>
+
+        <div class="container animate-fade-up">
+            <div class="dashboard">
+    <div class="dash-card total"><h3>المشتركين</h3><p id="total-clients">0</p></div>
+    <div class="dash-card active"><h3>نشط </h3><p id="active-clients">0</p></div>
+    <div class="dash-card expired"><h3>منتهي ×</h3><p id="expired-clients">0</p></div>
+    
+    <div class="dash-card debt-full">
+        <h3>إجمالي الديون</h3>
+        <p id="total-debts" style="color:#ff4d4d; font-size: 2rem;">0</p>
+    </div>
+</div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showSection('members-section', event)">الأعضاء</button>
+                <button class="tab-btn" onclick="showSection('add-section', event)">إضافة</button>
+                <button class="tab-btn" onclick="showSection('scan-section', event)">ماسح QR</button>
+            </div>
+
+            <section id="members-section" class="section active-section">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="🔍 ابحث بالاسم..." onkeyup="searchMembers()">
+                    
+                    <select id="status-filter" onchange="filterByStatus()" style="margin-top: 10px; background: var(--card); border: 1px solid var(--primary); color: white; padding: 5px; border-radius: 5px; width: 100%;">
+                        <option value="all">كل المشتركين</option>
+                        <option value="active">النشط فقط </option>
+                        <option value="expired">المنتهي فقط </option>
+                        <option value="debts">الديون فقط</option>
+                    </select>
+                </div>
+                <div id="members-list"></div>
+            </section>
+
+            <section id="add-section" class="section">
+                <form id="add-form" onsubmit="addMember(event)" class="pro-form animate-fade-up">
+                    <div class="input-group"><input type="text" id="name" placeholder="الاسم بالكامل" required></div>
+                    <div class="input-group"><input type="tel" id="phone" placeholder="رقم الموبايل" required></div>
+                    
+                    <div class="input-row">
+                        <select id="sub-type">
+                            <option>حديد</option>
+                            <option>تخسيس</option>
+                            <option>حديد + كارديو</option>
+                        </select>
+                        <select id="coach">
+                            <option>ك/ محمد عبد العزيز</option>
+                            <option>ك/ حمدي ناصر</option>
+                        </select>
+                    </div>
+
+                    <div class="input-row">
+                        <input type="number" id="height" placeholder="الطول (سم)">
+                        <input type="number" id="weight" placeholder="الوزن (كجم)">
+                    </div>
+
+                    <div class="input-group">
+                        <input type="number" id="debt-input" placeholder="المبلغ المتبقي (الدين)" value="0">
+                    </div>
+
+                    <div class="input-row">
+                        <div style="flex:1">
+                            <label style="font-size: 0.7rem; color: var(--accent);">تاريخ البداية</label>
+                            <input type="date" id="start-date" required>
+                        </div>
+                        <div style="flex:1">
+                            <label style="font-size: 0.7rem; color: var(--danger);">تاريخ النهاية</label>
+                            <input type="date" id="end-date" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-main glow-effect">Save</button>
+                </form>
+            </section>
+
+            <section id="scan-section" class="section">
+                <div class="scanner-container animate-fade-up">
+                    <div id="reader"></div>
+                    <div id="scan-result" style="display: none;">
+                        <h3>Results</h3>
+                        <div id="result-text"></div>
+                        <button onclick="resetScanner()" class="btn-s btn-primary glow-effect" style="margin-top:20px;">Other Scan</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="modal">
+        <div class="modal-content animate-pop">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="qrcode-display"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <div id="edit-modal" class="modal">
+    <div class="modal-content animate-pop">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2 style="color: var(--accent); margin-bottom: 20px;">️- تعديل البيانات -</h2>
+        <form id="edit-form" class="pro-form">
+            <input type="hidden" id="edit-id"> <input type="text" id="edit-name" placeholder="الاسم" required>
+            <input type="tel" id="edit-phone" placeholder="الموبايل" required>
+            <div class="input-row">
+                <select id="edit-sub-type">
+                    <option>حديد</option>
+                    <option>تخسيس</option>
+                    <option>حديد + كارديو</option>
+                </select>
+                <select id="edit-coach">
+                    <option>ك/ محمد عبد العزيز</option>
+                    <option>ك/ حمدي ناصر</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <input type="number" id="edit-height" placeholder="الطول">
+                <input type="number" id="edit-weight" placeholder="الوزن">
+            </div>
+            <input type="number" id="edit-debt" placeholder="الدين المتبقي">
+            <div class="input-row">
+                <input type="date" id="edit-end-date" title="تاريخ الانتهاء">
+            </div>
+            <button type="button" onclick="updateMemberData()" class="btn-main glow-effect">Save</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
