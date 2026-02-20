@@ -77,10 +77,54 @@ body::before {
 .logo-box { font-size: 2.5rem; font-weight: 900; color: var(--primary); margin-bottom: 25px; }
 .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; transition: 0.3s; }
 .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+header {
+    text-align: center;
+    padding: 10px 20px;
+    background: rgba(30, 41, 59, 0.95); /* لون الكارت مع شفافية بسيطة */
+    margin-bottom: 30px;
+    position: sticky; /* ده سطر التثبيت */
+    top: 0;           /* يلزق فوق */
+    z-index: 1000;    /* يظهر فوق الكروت */
+    backdrop-filter: blur(10px); /* تأثير الزجاج الضبابي */
+    overflow: hidden;
+}
 
-header { text-align: center; padding: 25px; background: var(--card); border-bottom: 2px solid var(--primary); margin-bottom: 20px; }
-.logo-text { font-size: 2rem; font-weight: 900; color: var(--primary); letter-spacing: 1px; display: inline-flex; align-items: center; gap: 10px; }
+/* الخط النيون اللي تحت البانر */
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    filter: drop-shadow(0 0 8px var(--primary));
+}
 
+/* نص اللوجو بالتوهج الهادئ */
+.logo-text {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    animation: blueGlowBreath 4s ease-in-out infinite;
+}
+
+/* أنميشن النبض الهادئ */
+@keyframes blueGlowBreath {
+    0%, 100% {
+        text-shadow: 0 0 5px rgba(59, 130, 246, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4);
+        transform: scale(1.02);
+    }
+}
 .container { padding: 15px; max-width: 600px; margin: 0 auto; }
 
 .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
@@ -122,7 +166,17 @@ input:focus, select:focus { border-color: var(--primary); }
 
 /* تنسيق الماسح الضوئي */
 .scanner-container { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; }
-#reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; border: 2px solid var(--primary); }
+#reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--primary);
+    min-height: 300px; /* ده اللي هيخلي الكاميرا تفتح وتظهر بدل الخط الرفيع */
+    background: #000; /* خلفية سوداء للمكان قبل ما الكاميرا تشتغل */
+}
+
 #scan-result { margin-top: 20px; padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid var(--success); }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; backdrop-filter: blur(5px); }
@@ -260,4 +314,286 @@ input:focus, select:focus { border-color: var(--primary); }
     align-items: center;
     margin: 15px auto;
     width: 100%;
+}
+/* توسيع المسافة بين الفلتر وقائمة الكروت */
+#status-filter, 
+select {
+    margin-bottom: 10px !important; /* دي المسافة اللي هتفصلهم عن بعض */
+}
+
+/* زيادة تأكيد الفصل من ناحية قائمة الكروت */
+#members-list {
+    margin-top: 10px;
+}
+.filter-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    align-items: center;
+}
+
+button.btn-primary {
+    white-space: nowrap; /* عشان كلمة تصدير متتكسرش على سطرين */
+}
+.export-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px; /* عشان ميبقاش لازق في حواف الشاشة */
+    margin-bottom: 15px;
+}
+
+/* الزرار بستايل السيستم الموحد */
+.export-btn {
+    width: 100%;
+    max-width: 600px;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: white;
+    
+    /* نفس ألوان زراير السيستم (الأزرق النيون) */
+    background: linear-gradient(135deg, #3b82f6, #2563eb); 
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+/* تأثير الحركة عند الوقوف عليه */
+.export-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+    background: linear-gradient(135deg, #60a5fa, #3b82f6); /* تفتيح بسيط */
+}
+
+.export-btn:active {
+    transform: scale(0.98);
+}
+/* الشاشة الخلفية بالكامل */
+.login-overlay {
+    background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+}
+
+/* صندوق اللوجن الزجاجي */
+.login-box {
+    background: rgba(30, 41, 59, 0.4); /* شفافية عالية */
+    backdrop-filter: blur(20px);      /* تغبيش زجاجي قوي */
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 30px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 
+                0 0 15px rgba(59, 130, 246, 0.1);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* كلمة X-GYM */
+.logo-box {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #3b82f6;
+    margin-bottom: 5px;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    letter-spacing: 3px;
+}
+
+/* أسماء الكباتن */
+.coaches-names {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+/* خانات الإدخال */
+.login-box input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.login-box input:focus {
+    border-color: #3b82f6;
+    background: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+/* زرار الدخول */
+.btn-main.glow-effect {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+.btn-main.glow-effect:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+}
+
+/* أنميشن الـ Pop اللي كنت عامله بس بشكل أنعم */
+.animate-pop {
+    animation: zoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+/* تأثير برق خفيف وسريع (بدون تهنيج) */
+.lightning-effect {
+    position: relative;
+    color: #fff;
+    /* ظل ثابت خفيف عشان ميهنجش */
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    /* هنستخدم will-change عشان المتصفح يستعد للأنميشن */
+    will-change: opacity, transform;
+    animation: simple-flash 4s infinite;
+}
+
+/* أنميشن وميض ذكي (يستخدم المعالج الجرافيكي فقط) */
+@keyframes simple-flash {
+    0%, 90%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    92% { 
+        opacity: 0.7; 
+        transform: scale(1.03); 
+        color: #3b82f6;
+    }
+    94% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    96% { 
+        opacity: 0.8; 
+        color: #60a5fa;
+    }
+}
+
+/* بدل ما نعمل ظل نيون حقيقي بكل الاتجاهات، هنستخدم طبقة واحدة خفيفة */
+.login-box {
+    /* شلنا الـ blur التقيل وبسطناه */
+    background: rgba(15, 23, 42, 0.85); 
+    backdrop-filter: blur(8px); /* قللنا القوة من 20 لـ 8 */
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+/* تنسيق خانة تاريخ الانتهاء */
+#end-date {
+    width: 100% !important;
+    padding: 12px !important;
+    background-color: #1e293b !important; /* لون غامق متناسق مع السيستم */
+    color: white !important; /* الكتابة بالأبيض */
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+/* لما تضغط على الخانة تنور أزرق */
+#end-date:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+/* إظهار أيقونة النتيجة (الكلندر) باللون الأبيض */
+#end-date::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* مهم جداً عشان الأيقونة تبان */
+    cursor: pointer;
+}
+/* توحيد مقاسات خانات التاريخ */
+.date-input-container input[type="date"] {
+    width: 100% !important;
+    height: 45px !important; /* ارتفاع موحد */
+    background: #111827 !important;
+    border: 1px solid #374151 !important;
+    border-radius: 10px !important;
+    color: white !important;
+    padding: 0 10px !important;
+    box-sizing: border-box !important;
+}
+
+/* محاذاة العناوين لليمين */
+.date-input-container label {
+    text-align: right;
+    display: block;
+}
+/* توحيد حاويات التاريخ */
+.date-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* توحيد ستايل الخانتين (البداية والانتهاء) */
+#start-date, #end-date {
+    width: 100% !important;
+    height: 42px !important;      /* ارتفاع ثابت بالبكسل عشان ميهربش */
+    background-color: #111827 !important; /* لون غامق جداً وموحد */
+    color: white !important;
+    border: 1px solid #374151 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    font-size: 0.9rem !important;
+    box-sizing: border-box !important; /* بيمنع الخانة تطول بسبب الـ padding */
+    appearance: none;              /* بيمسح أي ستايل قديم للمتصفح */
+    -webkit-appearance: none;
+}
+
+/* توحيد شكل العناوين فوق الخانات */
+.date-container label {
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    margin-bottom: 6px !important;
+    text-align: right !important;
+    display: block !important;
+}
+
+/* لون العناوين (ممكن توحدهم أو تسيبهم مختلفين) */
+label[for="start-date"] { color: var(--accent) !important; }
+label[for="end-date"] { color: #3b82f6 !important; }
+
+/* إظهار أيقونة الكاليندر بنفس اللون في الخانتين */
+#start-date::-webkit-calendar-picker-indicator,
+#end-date::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
 }
