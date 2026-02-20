@@ -15,15 +15,17 @@
 <body>
 
     <div id="login-screen" class="login-overlay">
-        <div class="login-box animate-pop">
-            <div class="logo-box">• X-GYM •</div>
-            <h4>Coach/Mohamed - Coach/Hamdy</h4>
-            <input type="text" id="username" placeholder="اسم المستخدم">
-            <input type="password" id="password" placeholder="كلمة المرور">
-            <button onclick="checkLogin()" class="btn-main glow-effect">دخول</button>
-        </div>
+    <div class="login-box animate-pop">
+        <div class="logo-box lightning-effect">• X-GYM •</div>
+        
+        <h4 class="coaches-names">Coach/Mohamed - Coach/Hamdy</h4>
+        
+        <input type="text" id="username" placeholder="اسم المستخدم">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        
+        <button onclick="checkLogin()" class="btn-main glow-effect">دخول</button>
     </div>
-
+</div>
     <div id="main-content" style="display: none;">
         <header class="animate-fade-down">
             <div class="logo-text">X-GYM System</div>
@@ -45,10 +47,17 @@
                 <button class="tab-btn" onclick="showSection('add-section', event)">إضافة</button>
                 <button class="tab-btn" onclick="showSection('scan-section', event)">ماسح QR</button>
             </div>
+<div class="action-buttons">
+    </div>
 
+<div class="export-container">
+    <button onclick="exportToExcel()" class="btn-main export-btn">
+         حفظ ملف Excel
+    </button>
+</div>
             <section id="members-section" class="section active-section">
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="🔍 ابحث بالاسم..." onkeyup="searchMembers()">
+                    <input type="text" id="search-input" placeholder="....Search" onkeyup="searchMembers()">
                     
                     <select id="status-filter" onchange="filterByStatus()" style="margin-top: 10px; background: var(--card); border: 1px solid var(--primary); color: white; padding: 5px; border-radius: 5px; width: 100%;">
                         <option value="all">كل المشتركين</option>
@@ -61,46 +70,52 @@
             </section>
 
             <section id="add-section" class="section">
-                <form id="add-form" onsubmit="addMember(event)" class="pro-form animate-fade-up">
-                    <div class="input-group"><input type="text" id="name" placeholder="الاسم بالكامل" required></div>
-                    <div class="input-group"><input type="tel" id="phone" placeholder="رقم الموبايل" required></div>
-                    
-                    <div class="input-row">
-                        <select id="sub-type">
-                            <option>حديد</option>
-                            <option>تخسيس</option>
-                            <option>حديد + كارديو</option>
-                        </select>
-                        <select id="coach">
-                            <option>ك/ محمد عبد العزيز</option>
-                            <option>ك/ حمدي ناصر</option>
-                        </select>
-                    </div>
+    <form id="add-form" onsubmit="addMember(event)" class="pro-form animate-fade-up">
+        <div class="input-group">
+            <input type="text" id="name" placeholder="الاسم بالكامل" required>
+        </div>
+        <div class="input-group">
+            <input type="tel" id="phone" placeholder="رقم الموبايل" required>
+        </div>
+        
+        <div class="input-row">
+            <select id="sub-type" required>
+                <option value="">نوع الاشتراك</option>
+                <option>حديد</option>
+                <option>تخسيس</option>
+                <option>حديد + كارديو</option>
+            </select>
+            <select id="coach" required>
+                <option value="">المدرب</option>
+                <option>ك/ محمد عبد العزيز</option>
+                <option>ك/ حمدي ناصر</option>
+            </select>
+        </div>
 
-                    <div class="input-row">
-                        <input type="number" id="height" placeholder="الطول (سم)">
-                        <input type="number" id="weight" placeholder="الوزن (كجم)">
-                    </div>
+        <div class="input-row">
+            <input type="number" id="height" placeholder="الطول (سم)">
+            <input type="number" id="weight" placeholder="الوزن (كجم)">
+        </div>
 
-                    <div class="input-group">
-                        <input type="number" id="debt-input" placeholder="المبلغ المتبقي (الدين)" value="0">
-                    </div>
+        <div class="input-group">
+            <input type="number" id="debt-input" placeholder="المبلغ المتبقي (الدين)" value="0">
+        </div>
 
-                    <div class="input-row">
-                        <div style="flex:1">
-                            <label style="font-size: 0.7rem; color: var(--accent);">تاريخ البداية</label>
-                            <input type="date" id="start-date" required>
-                        </div>
-                        <div style="flex:1">
-                            <label style="font-size: 0.7rem; color: var(--danger);">تاريخ النهاية</label>
-                            <input type="date" id="end-date" required>
-                        </div>
-                    </div>
+        <div class="input-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div style="flex:1; display: flex; flex-direction: column;">
+                <label for="start-date" style="font-size: 0.85rem; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-align: right;">تاريخ البداية</label>
+                <input type="date" id="start-date" required style="width: 100%; height: 42px; background-color: #111827; color: white; border: 1px solid #374151; border-radius: 8px; padding: 8px 12px; box-sizing: border-box;">
+            </div>
+            
+            <div style="flex:1; display: flex; flex-direction: column;">
+                <label for="end-date" style="font-size: 0.85rem; color: #3b82f6; font-weight: bold; margin-bottom: 5px; text-align: right;">تاريخ الانتهاء</label>
+                <input type="date" id="end-date" required style="width: 100%; height: 42px; background-color: #111827; color: white; border: 1px solid #374151; border-radius: 8px; padding: 8px 12px; box-sizing: border-box;">
+            </div>
+        </div>
 
-                    <button type="submit" class="btn-main glow-effect">Save</button>
-                </form>
-            </section>
-
+        <button type="submit" class="btn-main glow-effect" style="width: 100%;">Save</button>
+    </form>
+</section>
             <section id="scan-section" class="section">
                 <div class="scanner-container animate-fade-up">
                     <div id="reader"></div>
