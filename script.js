@@ -222,13 +222,41 @@ function searchMembers() {
     const q = document.getElementById('search-input').value.toLowerCase();
     renderList(allMembers.filter(m => m.name.toLowerCase().includes(q)));
 }
-
-// 11. وظائف إضافية
+// 11. وظائف إضافية - النسخة المحسنة لتوليد الـ QR
 function showQR(name) {
-    document.getElementById('qrcode-display').innerHTML = '';
+    const qrContainer = document.getElementById('qrcode-display');
+    
+    // 1. مسح المحتوى القديم تماماً
+    qrContainer.innerHTML = ''; 
+    
+    // 2. التأكد إن الاسم موجود وليس فارغاً
+    if (!name || name === "undefined" || name.trim() === "") {
+        alert("خطأ: اسم المشترك غير مكتمل لتوليد الكود!");
+        return;
+    }
+
+    // 3. إظهار المودال
     document.getElementById('qr-modal').style.display = 'block';
-    new QRCode(document.getElementById('qrcode-display'), { text: name, width: 200, height: 200 });
+
+    // 4. الانتظار لحظة لضمان استقرار الـ DOM
+    setTimeout(() => {
+        try {
+            new QRCode(qrContainer, {
+                text: name.trim(), // تنظيف الاسم من المسافات الزائدة
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M // مستوى تصحيح متوسط لسرعة التوليد
+            });
+        } catch (error) {
+            console.error("QR Generation Error:", error);
+            qrContainer.innerHTML = "<p style='color:red;'>عذراً، فشل توليد الكود. حاول مرة أخرى.</p>";
+        }
+    }, 100);
 }
+
+
 function closeModal() { document.getElementById('qr-modal').style.display = 'none'; }
 function deleteMember(id) { if(confirm("حذف العضو؟")) db.collection("members").doc(id).delete(); }
 
