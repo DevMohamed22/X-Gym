@@ -34,8 +34,11 @@ function showSection(id, event) {
     
     if(event) event.currentTarget.classList.add('active');
 
-    if (id === 'scan-section') startScanner();
-    else stopScanner();
+    if (id === 'scan-section') {
+        setTimeout(() => { startScanner(); }, 300); // تأخير لضمان فتح الكاميرا بمساحة صحيحة
+    } else {
+        stopScanner();
+    }
 }
 
 // 5. جلب البيانات من Firebase
@@ -47,31 +50,56 @@ function loadMembers() {
     });
 }
 
-// 6. إضافة مشترك جديد (تم إضافة خانة الدين)
+// 6. إضافة مشترك جديد
 function addMember(e) {
     e.preventDefault();
-    const data = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        type: document.getElementById('sub-type').value,
-        coach: document.getElementById('coach').value,
-        height: document.getElementById('height').value,
-        weight: document.getElementById('weight').value,
-        debt: parseFloat(document.getElementById('debt-input').value) || 0, // إضافة الدين
-        startDate: document.getElementById('start-date').value,
-        endDate: document.getElementById('end-date').value,
-        sessions: 0,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    
+    // سطر للتأكد في الـ Console إن الزرار شغال
+    console.log("محاولة حفظ البيانات بدأت...");
 
+    try {
+        const data = {
+            // علامة الـ (?) بتخلي الكود ميفصلش لو الـ ID مش موجود
+            name: document.getElementById('name')?.value || "",
+            phone: document.getElementById('phone')?.value || "",
+            type: document.getElementById('sub-type')?.value || "شهر",
+            coach: document.getElementById('coach')?.value || "بدون مدرب",
+            height: document.getElementById('height')?.value || "0",
+            weight: document.getElementById('weight')?.value || "0",
+            debt: parseFloat(document.getElementById('debt-input')?.value) || 0,
+            startDate: document.getElementById('start-date')?.value || "",
+            endDate: document.getElementById('end-date')?.value || "",
+            sessions: 0,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // لو التاريخين ناقصين، نبه المستخدم
+        if (!data.startDate || !data.endDate) {
+            alert("⚠️ برجاء اختيار تاريخ البداية وتاريخ الانتهاء");
+            return;
+        }
+
+        db.collection("members").add(data).then(() => {
+            alert("تم حفظ المشترك بنجاح ⚡");
+            document.getElementById('add-form').reset();
+            showSection('members-section');
+        }).catch(err => {
+            console.error("Firebase Error:", err);
+            alert("خطأ في قاعدة البيانات: " + err.message);
+        });
+
+    } catch (error) {
+        console.error("General Error:", error);
+        alert("حدث خطأ في تجميع البيانات، تأكد من وجود كل الخانات.");
+    }
+}
     db.collection("members").add(data).then(() => {
         alert("تم حفظ المشترك بنجاح ⚡");
         document.getElementById('add-form').reset();
         showSection('members-section');
     }).catch(err => alert("خطأ: " + err));
-}
 
-// 7. عرض قائمة الأعضاء (تم إضافة عرض الدين والبرق النيون)
+// 7. عرض قائمة الأعضاء (الكود الأصلي كامل بدون قص)
 function renderList(list) {
     const box = document.getElementById('members-list');
     box.innerHTML = '';
@@ -117,20 +145,19 @@ function renderList(list) {
                         <a href="https://wa.me/2${m.phone}" target="_blank" style="color:#25d366;"><i class="fab fa-whatsapp"></i></a>
                         <a href="tel:${m.phone}"><i class="fas fa-phone-alt"></i></a>
                     </div>
-                    <div class="control-btns">
-    <div class="control-btns" style="display: flex; gap: 8px;">
-    <button class="btn-s" onclick="showQR('${m.name}')" style="background: #252b39; border: 1px solid #3d4455; color: #fff;">
-        <i class="fas fa-qrcode"></i>
-    </button>
-    
-    <button class="btn-s" onclick="openEditModal('${m.id}')" style="background: #252b39; border: 1px solid #3d4455; color: #00f2fe;">
-        <i class="fas fa-edit"></i>
-    </button>
-    
-    <button class="btn-s" onclick="deleteMember('${m.id}')" style="background: #252b39; border: 1px solid #3d4455; color: #ff4d4d;">
-        <i class="fas fa-trash"></i>
-    </button>
-</div>
+                    <div class="control-btns" style="display: flex; gap: 8px;">
+                        <button class="btn-s" onclick="showQR('${m.id}')" style="background: #252b39; border: 1px solid #3d4455; color: #fff;">
+                            <i class="fas fa-qrcode"></i>
+                        </button>
+                        
+                        <button class="btn-s" onclick="openEditModal('${m.id}')" style="background: #252b39; border: 1px solid #3d4455; color: #00f2fe;">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        
+                        <button class="btn-s" onclick="deleteMember('${m.id}')" style="background: #252b39; border: 1px solid #3d4455; color: #ff4d4d;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>`;
     });
@@ -155,13 +182,27 @@ function stopScanner() {
     }
 }
 
-function onScanSuccess(decodedText) {
-    stopScanner(); 
-    const member = allMembers.find(m => m.name === decodedText);
+// استقبال الـ QR وعرض البروفايل الكامل (بدون قص) مع معالجة المشترك الجديد
+async function onScanSuccess(decodedText) {
+    const scannedId = decodedText.trim();
+    let member = allMembers.find(m => m.id === scannedId);
+    
     const resultBox = document.getElementById('scan-result');
     const resultText = document.getElementById('result-text');
 
+    if (!member) {
+        try {
+            const doc = await db.collection("members").doc(scannedId).get();
+            if (doc.exists) {
+                member = { id: doc.id, ...doc.data() };
+            }
+        } catch (err) {
+            console.error("خطأ في جلب البيانات:", err);
+        }
+    }
+
     if (member) {
+        stopScanner(); 
         const newCount = (member.sessions || 0) + 1;
         db.collection("members").doc(member.id).update({ sessions: newCount }).then(() => {
             const today = new Date().setHours(0,0,0,0);
@@ -195,11 +236,12 @@ function onScanSuccess(decodedText) {
                     </div>
                 </div>
             `;
+            resultBox.style.display = 'block';
         });
     } else {
-        resultText.innerHTML = `<div class="member-card" style="border:2px solid var(--danger); text-align:center;"><h2>❌ غير مسجل!</h2></div>`;
+        resultText.innerHTML = `<div class="member-card" style="border:2px solid var(--danger); text-align:center;"><h2>❌ غير مسجل أو محذوف!</h2></div>`;
+        resultBox.style.display = 'block';
     }
-    resultBox.style.display = 'block';
 }
 
 function resetScanner() {
@@ -207,7 +249,7 @@ function resetScanner() {
     startScanner();
 }
 
-// 10. البحث والفلترة (تم إضافة فلتر الديون)
+// 10. البحث والفلترة 
 function filterByStatus() {
     const status = document.getElementById('status-filter').value;
     const today = new Date().setHours(0,0,0,0);
@@ -218,20 +260,30 @@ function filterByStatus() {
     renderList(filtered);
 }
 
+// البحث بالاسم أو برقم الهاتف
 function searchMembers() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    renderList(allMembers.filter(m => m.name.toLowerCase().includes(q)));
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    
+    const filtered = allMembers.filter(m => {
+        const nameMatch = m.name.toLowerCase().includes(q);
+        const phoneMatch = m.phone.includes(q); // البحث برقم الهاتف
+        return nameMatch || phoneMatch;
+    });
+
+    renderList(filtered);
 }
+
+
 // 11. وظائف إضافية - النسخة المحسنة لتوليد الـ QR
-function showQR(name) {
+function showQR(id) {
     const qrContainer = document.getElementById('qrcode-display');
     
     // 1. مسح المحتوى القديم تماماً
     qrContainer.innerHTML = ''; 
     
-    // 2. التأكد إن الاسم موجود وليس فارغاً
-    if (!name || name === "undefined" || name.trim() === "") {
-        alert("خطأ: اسم المشترك غير مكتمل لتوليد الكود!");
+    // 2. التأكد إن الـ ID موجود
+    if (!id || id === "undefined" || id.trim() === "") {
+        alert("خطأ: معرف المشترك غير مكتمل لتوليد الكود!");
         return;
     }
 
@@ -242,12 +294,12 @@ function showQR(name) {
     setTimeout(() => {
         try {
             new QRCode(qrContainer, {
-                text: name.trim(), // تنظيف الاسم من المسافات الزائدة
+                text: id.trim(), // الاعتماد على الـ ID الفريد
                 width: 200,
                 height: 200,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M // مستوى تصحيح متوسط لسرعة التوليد
+                correctLevel: QRCode.CorrectLevel.M 
             });
         } catch (error) {
             console.error("QR Generation Error:", error);
@@ -255,7 +307,6 @@ function showQR(name) {
         }
     }, 100);
 }
-
 
 function closeModal() { document.getElementById('qr-modal').style.display = 'none'; }
 function deleteMember(id) { if(confirm("حذف العضو؟")) db.collection("members").doc(id).delete(); }
@@ -281,11 +332,7 @@ function updateDash() {
     document.getElementById('total-debts').innerText = totalDebt.toLocaleString() + " ج.م";
 }
 
-    // تحديث عداد المنتهي (اختياري لو لسه محتاجه)
-    if(document.getElementById('expired-clients')) {
-        document.getElementById('expired-clients').innerText = allMembers.length - active;
-    }
-    // 1. فتح المودال وملء البيانات القديمة
+// 1. فتح المودال وملء البيانات القديمة للتعديل
 function openEditModal(id) {
     const m = allMembers.find(member => member.id === id);
     if (!m) return;
@@ -328,4 +375,31 @@ function updateMemberData() {
         closeEditModal();
     })
     .catch(err => alert("حدث خطأ أثناء التحديث: " + err));
+}
+function exportToExcel() {
+    // تأكد إن allMembers هو اسم المصفوفة اللي فيها بيانات المشتركين عندك
+    if (typeof allMembers === 'undefined' || allMembers.length === 0) {
+        alert("عفواً، لا توجد بيانات لتصديرها!");
+        return;
+    }
+
+    // تجهيز محتوى الملف (يدعم اللغة العربية)
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+    csvContent += "الاسم,رقم الهاتف,تاريخ الانتهاء,الديون\n"; // العناوين
+
+    // إضافة بيانات كل مشترك في سطر
+    allMembers.forEach(function(m) {
+        let row = `${m.name || ''},${m.phone || ''},${m.expiryDate || m.endDate || ''},${m.debt || 0}`;
+        csvContent += row + "\n";
+    });
+
+    // عملية التحميل
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `نسخة_بيانات_الجيم_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+
+    link.click(); // ضغطة وهمية لبدء التحميل
+    document.body.removeChild(link);
 }
