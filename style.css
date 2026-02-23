@@ -125,8 +125,17 @@ header::after {
         transform: scale(1.02);
     }
 }
-.container { padding: 15px; max-width: 600px; margin: 0 auto; }
+.container { 
+    padding: 15px;
+    width: 100%;
+    margin: 0 auto;
+}
 
+@media (min-width: 992px) {
+    .container {
+        padding: 30px 80px;
+    }
+}
 .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
 .dash-card { background: var(--card); padding: 15px 5px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--primary); transition: 0.3s; }
 .dash-card h3 { font-size: 0.75rem; color: #94a3b8; }
